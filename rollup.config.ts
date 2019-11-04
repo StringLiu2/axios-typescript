@@ -7,20 +7,20 @@ import json from 'rollup-plugin-json'
 
 const pkg = require('./package.json')
 
-const libraryName = 'ts-axios'
+const libraryName = 'axios'
 
 export default {
-  input: `src/${libraryName}.ts`,
-  output: [
-    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: true },
-    { file: pkg.module, format: 'es', sourcemap: true },
+  input: `src/index.ts`, // 打包入口文件
+  output: [ // 目标输出文件，打包文件名，map文件
+    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: false },
+    { file: pkg.module, format: 'es', sourcemap: false },
   ],
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-  external: [],
+  external: [], // 不需要打包的
   watch: {
-    include: 'src/**',
+    include: 'src/**', // 监听文件变化
   },
-  plugins: [
+  plugins: [ // 打包依赖的插件
     // Allow json resolution
     json(),
     // Compile TypeScript files
