@@ -46,7 +46,7 @@ export interface AxiosRequestConfig {
     /**
      * xsrf防止跨域伪造的header名
      */
-    xsrHeaderName?: string;
+    xsrfHeaderName?: string;
     /**
      * 下载进度监控
      */

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var dispatchRequest_1 = require("./dispatchRequest");
 var interceptorManger_1 = require("./interceptorManger");
-var margeConfig_1 = require("./margeConfig");
+var mergeConfig_1 = require("./mergeConfig");
 /**
  * axios类的配置，配置拦截器、defaults、request、get、post、delete等等等。
  * 同时还执行了拦截器
@@ -30,14 +30,16 @@ var Axios = /** @class */ (function () {
             config = url;
         }
         // 先合并一下config
-        config = margeConfig_1.default(this.defaults, config); // 合并配置，以用户的配置config有限
+        config = mergeConfig_1.default(this.defaults, config); // 合并配置，以用户的配置config有限
         // 转换成小写
         config.method = config.method.toLowerCase();
         // 初始化拦截器链,里面一堆拦截器，初始值
-        var chain = [{
+        var chain = [
+            {
                 resolved: dispatchRequest_1.default,
                 rejected: undefined,
-            }];
+            }
+        ];
         // 都是顺序执行传入的use(xxx)的回调函数，第一个就是resolve，第二个就是reject，每次都执行这两个成功/失败的回调，不为空的情况下
         // 循环请求拦截器，放到拦截器链中，在中间的请求拦截器之前
         this.interceptors.request.forEach(function (interceptor) {
@@ -62,43 +64,44 @@ var Axios = /** @class */ (function () {
     };
     Axios.prototype.get = function (url, config) {
         // 合并config和rul
-        return this.request(this._requestMethodWithoutData(url, 'get', config));
+        return this._requestMethodWithoutData(url, 'get', config);
     };
     Axios.prototype.delete = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'delete', config));
+        return this._requestMethodWithoutData(url, 'delete', config);
     };
     Axios.prototype.head = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'head', config));
+        return this._requestMethodWithoutData(url, 'head', config);
     };
     Axios.prototype.options = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'options', config));
+        return this._requestMethodWithoutData(url, 'options', config);
     };
     // 合并config、url和method的方法
     Axios.prototype._requestMethodWithoutData = function (url, method, config) {
-        return Object.assign(config || {}, {
+        return this.request(Object.assign(config || {}, {
             url: url,
             method: method,
-        });
+        }));
     };
     Axios.prototype.post = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'post', data, config));
+        return this._requestMethodWithData(url, 'post', data, config);
     };
     Axios.prototype.put = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'put', data, config));
+        return this._requestMethodWithData(url, 'put', data, config);
     };
     Axios.prototype.patch = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'patch', data, config));
+        return this._requestMethodWithData(url, 'patch', data, config);
     };
     // 合并config、data、url和method的方法
     Axios.prototype._requestMethodWithData = function (url, method, data, config) {
-        return Object.assign(config || {}, {
+        return this.request(Object.assign(config || {}, {
             url: url,
             method: method,
-        });
+            data: data,
+        }));
     };
     Axios.prototype.getUri = function (config) {
         // 先合并一下config
-        config = margeConfig_1.default(this.defaults, config);
+        config = mergeConfig_1.default(this.defaults, config);
         // 最后转换一个url，然后返回出去
         return dispatchRequest_1.transformURL(config);
     };

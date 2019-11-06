@@ -12,14 +12,14 @@ var util_1 = require("../helpers/util");
 function xhr(config) {
     return new Promise(function (resolve, reject) {
         // 利用原生ajax发送
-        var url = config.url, _a = config.data, data = _a === void 0 ? null : _a, method = config.method, headers = config.headers, responseType = config.responseType, timeout = config.timeout, cancelToken = config.cancelToken, withCredentials = config.withCredentials, xsrHeaderName = config.xsrHeaderName, xsrfCookieName = config.xsrfCookieName, onDownloadProgress = config.onDownloadProgress, onUploadProgress = config.onUploadProgress, auth = config.auth, validateStatus = config.validateStatus;
+        var url = config.url, data = config.data, method = config.method, _a = config.headers, headers = _a === void 0 ? {} : _a, responseType = config.responseType, timeout = config.timeout, cancelToken = config.cancelToken, withCredentials = config.withCredentials, xsrfHeaderName = config.xsrfHeaderName, xsrfCookieName = config.xsrfCookieName, onDownloadProgress = config.onDownloadProgress, onUploadProgress = config.onUploadProgress, auth = config.auth, validateStatus = config.validateStatus;
         var request = new XMLHttpRequest();
         // 设置请求头 url 是否是异步
-        request.open(method.toUpperCase(), url, true);
-        comfigureRequest();
-        addEvents();
-        processHeaders();
-        processCancel();
+        request.open(method.toLocaleUpperCase(), url, true);
+        comfigureRequest(); // 添加配置
+        addEvents(); // 添加事件
+        processHeaders(); // 处理头部
+        processCancel(); // 请求取消
         // 最后发送请求
         request.send(data);
         /**
@@ -68,14 +68,14 @@ function xhr(config) {
                 // 然后返回这个axios的响应,同时处理了一下response
                 handleResponse(response);
             };
-            // 处理超时
-            request.ontimeout = function handleTimeout() {
-                // ECONNABORTED网络被终止
-                reject(error_1.createError("Timeout of " + timeout + " ms", config, 'ECONNABORTED', request));
-            };
             // 请求错误的事件
             request.onerror = function handleError() {
                 reject(error_1.createError('Network Error', config, null, request)); // 网络错误处理，信息网络错误处理
+            };
+            // 处理超时
+            request.ontimeout = function handleTimeout() {
+                // ECONNABORTED网络被终止
+                reject(error_1.createError("Timeout of " + timeout + " ms exceeded", config, 'ECONNABORTED', request));
             };
             // 配置如果文件情况下的下载和上传进度
             if (onDownloadProgress) {
@@ -98,9 +98,9 @@ function xhr(config) {
             if ((withCredentials || url_1.isURLSameOrigin(url)) && xsrfCookieName) {
                 // 然后再读取cookie
                 var xsrfValue = cookie_1.default.read(xsrfCookieName);
-                // 判断这个值有没有，xsrHeaderName有没有设置，有的话设置到headers上面
-                if (xsrfValue && xsrHeaderName) {
-                    headers[xsrHeaderName] = xsrfValue;
+                // 判断这个值有没有，xsrfHeaderName有没有设置，有的话设置到headers上面
+                if (xsrfValue && xsrfHeaderName) {
+                    headers[xsrfHeaderName] = xsrfValue;
                 }
             }
             // 设置Authorization安全认证
@@ -127,13 +127,16 @@ function xhr(config) {
             // 判断cancelToken存在不
             if (cancelToken) {
                 // 执行promise,等到外部调用CancelToken类的时候，this.promise也就会有值，这时候就执行了下面的then
-                // tslint:disable-next-line: no-floating-promises
                 cancelToken
                     // promise实现异步分离
                     .promise
                     .then(function (reason) {
                     request.abort(); // 取消请求
                     reject(reason); // 然后把传入的reason这个Cancel实例返回出去
+                }).catch(
+                /* istanbul ignore next */
+                function () {
+                    // doNoting
                 });
             }
         }
@@ -149,7 +152,7 @@ function xhr(config) {
             }
             else {
                 // 否则就是300-500之间的错误
-                reject(error_1.createError("Request failed with status code " + response.status, config, null, request));
+                reject(error_1.createError("Request failed with status code " + response.status, config, null, request, response));
             }
         }
     });

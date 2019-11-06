@@ -19,7 +19,7 @@ function dispatchRequest(config) {
         return res;
     }, function (err) {
         if (err && err.response) {
-            err.response = transformResponseData(err.response);
+            err.response.data = transformResponseData(err.response);
         }
         return Promise.reject(err);
     });

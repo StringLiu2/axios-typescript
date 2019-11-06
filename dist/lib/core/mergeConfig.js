@@ -34,17 +34,17 @@ function deepMergestrat(val1, val2) {
         return val2; // 代表val2有值
     else if (util_1.isPlainObject(val1))
         return util_1.deepMerge(val1); // 当没有val2，只有val1，并且是普通对象的情况下，拷贝返回
-    else if (typeof val1 !== 'undefined')
+    else
         return val1; // val1也不是空，也不是object，直接返回
 }
-var stratKeysDeepMerge = ['headers', 'auth'];
-stratKeysDeepMerge.forEach(function (key) {
-    strats[key] = deepMergestrat;
-});
 // 拷贝的时候当val2有则直接拷贝val2的方式
 var stratKeysFromVal2 = ['url', 'params', 'data'];
 stratKeysFromVal2.forEach(function (key) {
     strats[key] = fromVal2Strat;
+});
+var stratKeysDeepMerge = ['headers', 'auth'];
+stratKeysDeepMerge.forEach(function (key) {
+    strats[key] = deepMergestrat;
 });
 /**
  * 对默认配置和用户配置进行合并
@@ -75,4 +75,4 @@ function mergeConfig(config1, config2) {
     return config;
 }
 exports.default = mergeConfig;
-//# sourceMappingURL=margeConfig.js.map
+//# sourceMappingURL=mergeConfig.js.map

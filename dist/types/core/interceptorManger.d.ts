@@ -4,7 +4,7 @@ import { AxiosInterceptorManager, ResolvedFn, RejectedFn } from "../types";
  */
 interface Interceptor<T> {
     resolved: ResolvedFn<T>;
-    rejected: RejectedFn;
+    rejected?: RejectedFn;
 }
 /**
  * 拦截器管理类
@@ -12,7 +12,7 @@ interface Interceptor<T> {
 export default class InterceptorManger<T> implements AxiosInterceptorManager<T> {
     private interceptors;
     constructor();
-    use(resolved: ResolvedFn<T>, rejected: RejectedFn): number;
+    use(resolved: ResolvedFn<T>, rejected?: RejectedFn): number;
     eject(id: number): void;
     forEach(fn: (interceptor: Interceptor<T>) => void): void;
 }

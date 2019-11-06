@@ -20,7 +20,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
             timeout,
             cancelToken,
             withCredentials,
-            xsrHeaderName,
+            xsrfHeaderName,
             xsrfCookieName,
             onDownloadProgress,
             onUploadProgress,
@@ -123,9 +123,9 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
             if ((withCredentials || isURLSameOrigin(url!)) && xsrfCookieName) {
                 // 然后再读取cookie
                 const xsrfValue = cookie.read(xsrfCookieName);
-                // 判断这个值有没有，xsrHeaderName有没有设置，有的话设置到headers上面
-                if (xsrfValue && xsrHeaderName) {
-                    headers[xsrHeaderName] = xsrfValue;
+                // 判断这个值有没有，xsrfHeaderName有没有设置，有的话设置到headers上面
+                if (xsrfValue && xsrfHeaderName) {
+                    headers[xsrfHeaderName] = xsrfValue;
                 }
             }
             // 设置Authorization安全认证

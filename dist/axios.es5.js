@@ -360,14 +360,14 @@ var cookie = {
 function xhr(config) {
     return new Promise(function (resolve, reject) {
         // 利用原生ajax发送
-        var url = config.url, _a = config.data, data = _a === void 0 ? null : _a, method = config.method, headers = config.headers, responseType = config.responseType, timeout = config.timeout, cancelToken = config.cancelToken, withCredentials = config.withCredentials, xsrHeaderName = config.xsrHeaderName, xsrfCookieName = config.xsrfCookieName, onDownloadProgress = config.onDownloadProgress, onUploadProgress = config.onUploadProgress, auth = config.auth, validateStatus = config.validateStatus;
+        var url = config.url, data = config.data, method = config.method, _a = config.headers, headers = _a === void 0 ? {} : _a, responseType = config.responseType, timeout = config.timeout, cancelToken = config.cancelToken, withCredentials = config.withCredentials, xsrfHeaderName = config.xsrfHeaderName, xsrfCookieName = config.xsrfCookieName, onDownloadProgress = config.onDownloadProgress, onUploadProgress = config.onUploadProgress, auth = config.auth, validateStatus = config.validateStatus;
         var request = new XMLHttpRequest();
         // 设置请求头 url 是否是异步
-        request.open(method.toUpperCase(), url, true);
-        comfigureRequest();
-        addEvents();
-        processHeaders$$1();
-        processCancel();
+        request.open(method.toLocaleUpperCase(), url, true);
+        comfigureRequest(); // 添加配置
+        addEvents(); // 添加事件
+        processHeaders$$1(); // 处理头部
+        processCancel(); // 请求取消
         // 最后发送请求
         request.send(data);
         /**
@@ -416,14 +416,14 @@ function xhr(config) {
                 // 然后返回这个axios的响应,同时处理了一下response
                 handleResponse(response);
             };
-            // 处理超时
-            request.ontimeout = function handleTimeout() {
-                // ECONNABORTED网络被终止
-                reject(createError("Timeout of " + timeout + " ms", config, 'ECONNABORTED', request));
-            };
             // 请求错误的事件
             request.onerror = function handleError() {
                 reject(createError('Network Error', config, null, request)); // 网络错误处理，信息网络错误处理
+            };
+            // 处理超时
+            request.ontimeout = function handleTimeout() {
+                // ECONNABORTED网络被终止
+                reject(createError("Timeout of " + timeout + " ms exceeded", config, 'ECONNABORTED', request));
             };
             // 配置如果文件情况下的下载和上传进度
             if (onDownloadProgress) {
@@ -446,9 +446,9 @@ function xhr(config) {
             if ((withCredentials || isURLSameOrigin(url)) && xsrfCookieName) {
                 // 然后再读取cookie
                 var xsrfValue = cookie.read(xsrfCookieName);
-                // 判断这个值有没有，xsrHeaderName有没有设置，有的话设置到headers上面
-                if (xsrfValue && xsrHeaderName) {
-                    headers[xsrHeaderName] = xsrfValue;
+                // 判断这个值有没有，xsrfHeaderName有没有设置，有的话设置到headers上面
+                if (xsrfValue && xsrfHeaderName) {
+                    headers[xsrfHeaderName] = xsrfValue;
                 }
             }
             // 设置Authorization安全认证
@@ -475,13 +475,16 @@ function xhr(config) {
             // 判断cancelToken存在不
             if (cancelToken) {
                 // 执行promise,等到外部调用CancelToken类的时候，this.promise也就会有值，这时候就执行了下面的then
-                // tslint:disable-next-line: no-floating-promises
                 cancelToken
                     // promise实现异步分离
                     .promise
                     .then(function (reason) {
                     request.abort(); // 取消请求
                     reject(reason); // 然后把传入的reason这个Cancel实例返回出去
+                }).catch(
+                /* istanbul ignore next */
+                function () {
+                    // doNoting
                 });
             }
         }
@@ -497,7 +500,7 @@ function xhr(config) {
             }
             else {
                 // 否则就是300-500之间的错误
-                reject(createError("Request failed with status code " + response.status, config, null, request));
+                reject(createError("Request failed with status code " + response.status, config, null, request, response));
             }
         }
     });
@@ -538,7 +541,7 @@ function dispatchRequest(config) {
         return res;
     }, function (err) {
         if (err && err.response) {
-            err.response = transformResponseData(err.response);
+            err.response.data = transformResponseData(err.response);
         }
         return Promise.reject(err);
     });
@@ -661,17 +664,17 @@ function deepMergestrat(val1, val2) {
         return val2; // 代表val2有值
     else if (isPlainObject(val1))
         return deepMerge(val1); // 当没有val2，只有val1，并且是普通对象的情况下，拷贝返回
-    else if (typeof val1 !== 'undefined')
+    else
         return val1; // val1也不是空，也不是object，直接返回
 }
-var stratKeysDeepMerge = ['headers', 'auth'];
-stratKeysDeepMerge.forEach(function (key) {
-    strats[key] = deepMergestrat;
-});
 // 拷贝的时候当val2有则直接拷贝val2的方式
 var stratKeysFromVal2 = ['url', 'params', 'data'];
 stratKeysFromVal2.forEach(function (key) {
     strats[key] = fromVal2Strat;
+});
+var stratKeysDeepMerge = ['headers', 'auth'];
+stratKeysDeepMerge.forEach(function (key) {
+    strats[key] = deepMergestrat;
 });
 /**
  * 对默认配置和用户配置进行合并
@@ -733,10 +736,12 @@ var Axios = /** @class */ (function () {
         // 转换成小写
         config.method = config.method.toLowerCase();
         // 初始化拦截器链,里面一堆拦截器，初始值
-        var chain = [{
+        var chain = [
+            {
                 resolved: dispatchRequest,
                 rejected: undefined,
-            }];
+            }
+        ];
         // 都是顺序执行传入的use(xxx)的回调函数，第一个就是resolve，第二个就是reject，每次都执行这两个成功/失败的回调，不为空的情况下
         // 循环请求拦截器，放到拦截器链中，在中间的请求拦截器之前
         this.interceptors.request.forEach(function (interceptor) {
@@ -761,39 +766,40 @@ var Axios = /** @class */ (function () {
     };
     Axios.prototype.get = function (url, config) {
         // 合并config和rul
-        return this.request(this._requestMethodWithoutData(url, 'get', config));
+        return this._requestMethodWithoutData(url, 'get', config);
     };
     Axios.prototype.delete = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'delete', config));
+        return this._requestMethodWithoutData(url, 'delete', config);
     };
     Axios.prototype.head = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'head', config));
+        return this._requestMethodWithoutData(url, 'head', config);
     };
     Axios.prototype.options = function (url, config) {
-        return this.request(this._requestMethodWithoutData(url, 'options', config));
+        return this._requestMethodWithoutData(url, 'options', config);
     };
     // 合并config、url和method的方法
     Axios.prototype._requestMethodWithoutData = function (url, method, config) {
-        return Object.assign(config || {}, {
+        return this.request(Object.assign(config || {}, {
             url: url,
             method: method,
-        });
+        }));
     };
     Axios.prototype.post = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'post', data, config));
+        return this._requestMethodWithData(url, 'post', data, config);
     };
     Axios.prototype.put = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'put', data, config));
+        return this._requestMethodWithData(url, 'put', data, config);
     };
     Axios.prototype.patch = function (url, data, config) {
-        return this.request(this._requestMethodWithData(url, 'patch', data, config));
+        return this._requestMethodWithData(url, 'patch', data, config);
     };
     // 合并config、data、url和method的方法
     Axios.prototype._requestMethodWithData = function (url, method, data, config) {
-        return Object.assign(config || {}, {
+        return this.request(Object.assign(config || {}, {
             url: url,
             method: method,
-        });
+            data: data,
+        }));
     };
     Axios.prototype.getUri = function (config) {
         // 先合并一下config
@@ -842,7 +848,7 @@ var defaults = {
     headers: {
         // 默认给所有请求添加的请求头内容
         common: {
-            Accept: 'application/json,text/plain,/*/*',
+            Accept: 'application/json, text/plain, /*/*',
         }
     },
     // 默认的transformRequest、transformResponse

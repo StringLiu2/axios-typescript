@@ -32,3 +32,26 @@ axios.get('/user/12345', {
 })
 // 取消请求
 cancel();
+
+
+class Rectangle {
+    constructor(private long: number, private wide: number) { }
+    public area() {
+        return this.long * this.wide;
+    }
+    public girth() {
+        return 2 * (this.long + this.wide);
+    }
+}
+
+class Square extends Rectangle {
+    constructor(long: number, wide: number) {
+        if (long === wide) {
+            super(long, wide);
+        } else {
+            throw new Error('这个不是正方形');
+        }
+    }
+}
+const rectangle: Rectangle = new Rectangle(1,2);
+const square: Rectangle = new Square(1,2);

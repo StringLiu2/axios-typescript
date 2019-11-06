@@ -11,7 +11,7 @@ var defaults = {
     headers: {
         // 默认给所有请求添加的请求头内容
         common: {
-            Accept: 'application/json,text/plain,/*/*',
+            Accept: 'application/json, text/plain, /*/*',
         }
     },
     // 默认的transformRequest、transformResponse

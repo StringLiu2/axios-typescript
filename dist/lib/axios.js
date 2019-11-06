@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Axios_1 = require("./core/Axios");
 var util_1 = require("./helpers/util");
 var defaults_1 = require("./defaults"); // 默认传入这个defaults
-var margeConfig_1 = require("./core/margeConfig");
+var mergeConfig_1 = require("./core/mergeConfig");
 var CancelToken_1 = require("./cancel/CancelToken");
 var Cancel_1 = require("./cancel/Cancel");
 /**
@@ -24,7 +24,7 @@ function createInstance(config) {
 var axios = createInstance(defaults_1.default);
 // 扩展方法,创建新的axios实例
 axios.create = function create(config) {
-    config = margeConfig_1.default(defaults_1.default, config); // 合并config然后传递给createInstance
+    config = mergeConfig_1.default(defaults_1.default, config); // 合并config然后传递给createInstance
     return createInstance(config);
 };
 // 扩展取消请求的方法

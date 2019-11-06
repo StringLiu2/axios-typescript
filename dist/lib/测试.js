@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 var _1 = require("./");
 var querystring_1 = require("querystring");
@@ -32,4 +45,33 @@ _1.default.get('/user/12345', {
 });
 // 取消请求
 cancel();
+var Rectangle = /** @class */ (function () {
+    function Rectangle(long, wide) {
+        this.long = long;
+        this.wide = wide;
+    }
+    Rectangle.prototype.area = function () {
+        return this.long * this.wide;
+    };
+    Rectangle.prototype.girth = function () {
+        return 2 * (this.long + this.wide);
+    };
+    return Rectangle;
+}());
+var Square = /** @class */ (function (_super) {
+    __extends(Square, _super);
+    function Square(long, wide) {
+        var _this = this;
+        if (long === wide) {
+            _this = _super.call(this, long, wide) || this;
+        }
+        else {
+            throw new Error('这个不是正方形');
+        }
+        return _this;
+    }
+    return Square;
+}(Rectangle));
+var rectangle = new Rectangle(1, 2);
+var square = new Square(1, 2);
 //# sourceMappingURL=测试.js.map
